@@ -84,6 +84,23 @@
 .logo {
   position: relative;
 }
+
+.modalWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9;
+}
+
+.modal {
+  background-color: white;
+  height: 600px;
+  width: 500px;
+  padding: 50px;
+}
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {

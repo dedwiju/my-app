@@ -21,11 +21,11 @@ export default function Home() {
     });
     const data = await response.json();
     if (data.statusCode === 200) {
-      router.push("/dashboard");
+      router.push(`/dashboard/${email}`);
     }
   };
 
-  const onClick = (e: any) => {
+  const submitClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (
       email &&
@@ -82,10 +82,10 @@ export default function Home() {
             type="email"
             placeholder="이메일을 입력해주세요."
             width="75%"
-            isRequired
-            onChange={(event) => setEmail(event.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-          <Button type="submit" loadingText="시작하기" onClick={onClick}>
+          <Button type="submit" loadingText="시작하기" onClick={submitClick}>
             시작하기
           </Button>
         </Flex>
