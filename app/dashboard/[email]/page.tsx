@@ -19,13 +19,16 @@ import styles from "../../page.module.css";
 import "@aws-amplify/ui-react/styles.css";
 
 type tableList = { database?: String[] };
+type formulaList = { database: String[] };
 
 export default function Page({ params }: { params: { email: string } }) {
   const email = params.email.replace("%40", "@");
+  const formula: String[] = [];
   const [modal, setModal] = useState(false);
   const [columnName, setColumnName] = useState("");
   const [columnList, setColumnList] = useState<String[]>([]);
   const [tableList, setTableList] = useState<tableList>();
+  const [formulaList, setFormulaList] = useState<formulaList>();
 
   const addColumn = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,7 +43,12 @@ export default function Page({ params }: { params: { email: string } }) {
     const response = await fetch(`/api/tables/${email}`);
     const data = await response.json();
     if (data.statusCode === 200 && data.items.tableList) {
-      setTableList(data.items.tableList);
+      if (data.items.tableList) {
+        setTableList(data.items.tableList);
+      }
+      if (data.items.formula) {
+        setFormulaList(data.items.formula);
+      }
       setModal(false);
       return;
     }
@@ -56,6 +64,23 @@ export default function Page({ params }: { params: { email: string } }) {
       body: JSON.stringify({
         email,
         tableList: { database: [...columnList] },
+      }),
+    });
+    const data = await response.json();
+    if (data.statusCode === 200) {
+      getTables();
+    }
+  };
+
+  const postFormula = async () => {
+    const response = await fetch("/api/formula", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        formula: { database: formula },
       }),
     });
     const data = await response.json();
@@ -108,19 +133,27 @@ export default function Page({ params }: { params: { email: string } }) {
                         <TableCell as="th" key={index}>
                           <Flex justifyContent="space-around">
                             {column}
-                            {index !== row.length - 1 && (
+                            {!formulaList && index !== row.length - 1 && (
                               <SelectField
+                                placeholder="Select formula"
                                 label=""
+                                labelHidden
                                 style={{
                                   textAlign: "center",
                                 }}
+                                onChange={(e) =>
+                                  (formula[index] = e.target.value)
+                                }
                               >
-                                <option>+</option>
-                                <option>-</option>
-                                <option>/</option>
-                                <option>X</option>
-                                <option>=</option>
+                                <option value="+">+</option>
+                                <option value="-">-</option>
+                                <option value="/">/</option>
+                                <option value="*">X</option>
+                                <option value="=">=</option>
                               </SelectField>
+                            )}
+                            {formulaList && (
+                              <View>{formulaList.database[index]}</View>
                             )}
                           </Flex>
                         </TableCell>
@@ -129,7 +162,10 @@ export default function Page({ params }: { params: { email: string } }) {
                   </TableHead>
                 </Table>
                 <View style={{ textAlign: "right", marginTop: "10px" }}>
-                  <Button>Save a set formula</Button>
+                  {!formulaList && (
+                    <Button onClick={postFormula}>Save a set formula</Button>
+                  )}
+                  {formulaList && <Button>Add Data</Button>}
                 </View>
               </Tabs.Panel>
             </Tabs.Container>
